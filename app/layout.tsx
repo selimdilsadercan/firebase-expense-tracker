@@ -12,7 +12,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <body className={font.className}>{children}</body>
     </html>
-  );
+  );  
 }
 
 export default Layout;
