@@ -13,4 +13,4 @@
 
 - [x] create firebase project than create web app
 - [x] "npm install firebase"
-- [x] add /lib/firebase.js than copy config keys from init screen
+- [x] add /lib/firebase.ts than copy config keys from init screen
