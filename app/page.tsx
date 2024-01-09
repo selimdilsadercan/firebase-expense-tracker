@@ -1,46 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query } from "firebase/firestore";
+import { Expense } from "@/types";
+import db from "@/lib/firebase";
 
 function Page() {
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({ name: "", price: "" });
+  const [items, setItems] = useState<Expense[]>([]);
+  const [newItem, setNewItem] = useState<Expense>({ id: "", name: "", price: "" });
   const [total, setTotal] = useState(0);
 
   const addItem = async (e: any) => {
     e.preventDefault();
     if (newItem.name !== "" && newItem.price !== "") {
-      // setItems([...items, newItem]);
-      // await addDoc(collection(db, "items"), {
-      //   name: newItem.name.trim(),
-      //   price: newItem.price
-      // });
-      setNewItem({ name: "", price: "" });
+      setItems([...items, newItem]);
+      await addDoc(collection(db, "items"), {
+        name: newItem.name.trim(),
+        price: newItem.price
+      });
+      setNewItem({ id: "", name: "", price: "" });
     }
   };
 
-  // Read items from database
   useEffect(() => {
-    // const q = query(collection(db, "items"));
-    // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    //   let itemsArr = [];
-    //   querySnapshot.forEach((doc) => {
-    //     itemsArr.push({ ...doc.data(), id: doc.id });
-    //   });
-    //   setItems(itemsArr);
-    //   // Read total from itemsArr
-    //   const calculateTotal = () => {
-    //     const totalPrice = itemsArr.reduce((sum, item) => sum + parseFloat(item.price), 0);
-    //     setTotal(totalPrice);
-    //   };
-    //   calculateTotal();
-    //   return () => unsubscribe();
-    // });
+    const q = query(collection(db, "items"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let itemsArr: any[] = [];
+      querySnapshot.forEach((doc) => {
+        itemsArr.push({ ...doc.data(), id: doc.id });
+      });
+      setItems(itemsArr);
+
+      const calculateTotal = () => {
+        const totalPrice = itemsArr.reduce((sum, item) => sum + parseFloat(item.price), 0);
+        setTotal(totalPrice);
+      };
+      calculateTotal();
+      return () => unsubscribe();
+    });
   }, []);
 
-  // Delete items from database
   const deleteItem = async (id: string) => {
-    // await deleteDoc(doc(db, "items", id));
+    await deleteDoc(doc(db, "items", id));
   };
 
   return (
@@ -67,22 +68,22 @@ function Page() {
               +
             </button>
           </form>
+
           <ul>
             {items.map((item, id) => (
               <li key={id} className="my-4 w-full flex justify-between bg-slate-950">
                 <div className="p-4 w-full flex justify-between">
-                  {/* <span className="capitalize">{item.name}</span> */}
-                  {/* <span>${item.price}</span> */}
+                  <span className="capitalize">{item.name}</span>
+                  <span>${item.price}</span>
                 </div>
-                {/* <button onClick={() => deleteItem(item.id)} className="ml-8 p-4 border-l-2 border-slate-900 hover:bg-slate-900 w-16">
+                <button onClick={() => deleteItem(item.id)} className="ml-8 p-4 border-l-2 border-slate-900 hover:bg-slate-900 w-16">
                   X
-                </button> */}
+                </button>
               </li>
             ))}
           </ul>
-          {items.length < 1 ? (
-            ""
-          ) : (
+
+          {items.length >= 1 && (
             <div className="flex justify-between p-3">
               <span>Total</span>
               <span>${total}</span>
